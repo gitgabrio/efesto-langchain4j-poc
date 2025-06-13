@@ -1,0 +1,17 @@
+[
+  {
+    "step-type": "class",
+    "fullClassName": "org.kie.lc4j.efesto.runtime.KieLC4JOllamaChatModelllama32"
+  },
+  {
+    "step-type": "executable",
+    "modelLocalUriId": {
+      "model": "lc4j",
+      "basePath": "/ollama/llama3.2",
+      "fullPath": "/lc4j/ollama/llama3.2"
+    },
+    "fullClassNames": [
+      "org.kie.lc4j.efesto.runtime.KieLC4JOllamaChatModelllama32"
+    ]
+  }
+]

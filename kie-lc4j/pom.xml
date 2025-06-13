@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.kie</groupId>
+    <artifactId>drools-build-parent</artifactId>
+    <version>999-SNAPSHOT</version>
+    <relativePath>../build-parent/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>kie-lc4j</artifactId>
+  <packaging>pom</packaging>
+
+  <properties>
+    <java.module.name>kie.lc4j</java.module.name>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <version.langchain4>1.0.1</version.langchain4>
+    <version.langchain4-ollama>1.0.1-beta6</version.langchain4-ollama>
+    <version.ollama>1.20.4</version.ollama>
+    <version.junit-jupiter>1.19.6</version.junit-jupiter>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-ollama</artifactId>
+        <version>${version.langchain4-ollama}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j</artifactId>
+        <version>${version.langchain4}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kie</groupId>
+        <artifactId>kie-lc4j-efesto-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>efesto-common-utils</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-ollama</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+    </dependency>
+  </dependencies>
+
+  <modules>
+    <module>kie-lc4j-efesto-compilation</module>
+    <module>kie-lc4j-efesto-runtime</module>
+    <module>kie-lc4j-efesto-api</module>
+  </modules>
+
+</project>
