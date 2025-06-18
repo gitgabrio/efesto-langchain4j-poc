@@ -51,6 +51,11 @@
       </dependency>
       <dependency>
         <groupId>org.kie</groupId>
+        <artifactId>kie-lc4j-efesto-compilation</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kie</groupId>
         <artifactId>kie-dmn-feel</artifactId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
@@ -140,6 +145,11 @@
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>efesto-common-utils</artifactId>
+    </dependency>
+    <!-- LC4J -->
+    <dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-lc4j-efesto-compilation</artifactId>
     </dependency>
 
     <dependency>

@@ -91,8 +91,8 @@ class KieLC4JOllamaChatModelFactoryTest {
         assertThat(toCheck.getInitializer()).isNotEmpty();
         assertThat(toCheck.getInitializer().get()).isInstanceOf(StringLiteralExpr.class);
         StringLiteralExpr stringLiteralExpr = (StringLiteralExpr) toCheck.getInitializer().get();
-        assertThat(stringLiteralExpr.getValue()).isEqualTo("llama3.2");
-        String modelName = "modelName";
+        assertThat(stringLiteralExpr.getValue()).isEqualTo("modelName");
+        String modelName = "llama3.2";
         KieLC4JOllamaChatModelFactory.setModelName(modelTemplate, modelName);
         assertThat(toCheck.getInitializer()).isNotEmpty();
         assertThat(toCheck.getInitializer().get()).isInstanceOf(StringLiteralExpr.class);

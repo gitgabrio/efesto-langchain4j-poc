@@ -22,7 +22,8 @@ public enum FunctionKind {
 
     FEEL("FEEL"),
     JAVA("Java"),
-    PMML("PMML");
+    PMML("PMML"),
+    LC4J("LC4J");
     private final String value;
 
     FunctionKind(String v) {

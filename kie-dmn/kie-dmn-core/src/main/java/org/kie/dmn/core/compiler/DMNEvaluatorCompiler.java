@@ -56,6 +56,8 @@ import org.kie.dmn.core.compiler.alphanetbased.DMNAlphaNetworkEvaluatorCompiler;
 import org.kie.dmn.core.impl.BaseDMNTypeImpl;
 import org.kie.dmn.core.impl.CompositeTypeImpl;
 import org.kie.dmn.core.impl.DMNModelImpl;
+import org.kie.dmn.core.lc4j.LC4JInvocationEvaluator;
+import org.kie.dmn.core.lc4j.LC4JInvocationEvaluatorFactory;
 import org.kie.dmn.core.pmml.AbstractPMMLInvocationEvaluator;
 import org.kie.dmn.core.pmml.EfestoPMMLUtils;
 import org.kie.dmn.core.pmml.PMMLInvocationEvaluatorFactory;
@@ -101,6 +103,7 @@ import org.kie.dmn.model.api.OutputClause;
 import org.kie.dmn.model.api.Quantified;
 import org.kie.dmn.model.api.Relation;
 import org.kie.dmn.model.api.UnaryTests;
+import org.kie.efesto.common.api.identifiers.LocalUri;
 import org.kie.efesto.common.api.identifiers.ModelLocalUriId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,13 +131,17 @@ public class DMNEvaluatorCompiler implements DMNDecisionLogicCompiler {
 
     static Map<DMNConditionalEvaluator.EvaluatorIdentifier, DMNExpressionEvaluator> getEvaluatorIdentifierMap(Conditional expression, DMNExpressionEvaluator ifEvaluator, DMNExpressionEvaluator thenEvaluator, DMNExpressionEvaluator elseEvaluator) {
         Map<DMNConditionalEvaluator.EvaluatorIdentifier, DMNExpressionEvaluator> evaluatorIdMap = new HashMap<>();
-        evaluatorIdMap.put(getEvaluatorIdentifier(expression.getIf().getId(), DMNConditionalEvaluator.EvaluatorType.IF), ifEvaluator);
-        evaluatorIdMap.put(getEvaluatorIdentifier(expression.getThen().getId(), DMNConditionalEvaluator.EvaluatorType.THEN), thenEvaluator);
-        evaluatorIdMap.put(getEvaluatorIdentifier(expression.getElse().getId(), DMNConditionalEvaluator.EvaluatorType.ELSE), elseEvaluator);
+        evaluatorIdMap.put(getEvaluatorIdentifier(expression.getIf().getId(),
+                                                  DMNConditionalEvaluator.EvaluatorType.IF), ifEvaluator);
+        evaluatorIdMap.put(getEvaluatorIdentifier(expression.getThen().getId(),
+                                                  DMNConditionalEvaluator.EvaluatorType.THEN), thenEvaluator);
+        evaluatorIdMap.put(getEvaluatorIdentifier(expression.getElse().getId(),
+                                                  DMNConditionalEvaluator.EvaluatorType.ELSE), elseEvaluator);
         return evaluatorIdMap;
     }
 
-    static DMNConditionalEvaluator.EvaluatorIdentifier getEvaluatorIdentifier(String id, DMNConditionalEvaluator.EvaluatorType type) {
+    static DMNConditionalEvaluator.EvaluatorIdentifier getEvaluatorIdentifier(String id,
+                                                                              DMNConditionalEvaluator.EvaluatorType type) {
         return new DMNConditionalEvaluator.EvaluatorIdentifier(id, type);
     }
 
@@ -416,6 +423,8 @@ public class DMNEvaluatorCompiler implements DMNDecisionLogicCompiler {
             return compileFunctionDefinitionJAVA(ctx, model, node, functionName, funcDef);
         } else if (kind.equals(FunctionKind.PMML)) {
             return compileFunctionDefinitionPMML(ctx, model, node, functionName, funcDef);
+        } else if (kind.equals(FunctionKind.LC4J)) {
+            return compileFunctionDefinitionLC4J(ctx, model, node, functionName, funcDef);
         } else {
             MsgUtil.reportMessage(logger,
                                   DMNMessage.Severity.ERROR,
@@ -563,7 +572,7 @@ public class DMNEvaluatorCompiler implements DMNDecisionLogicCompiler {
             if (lookupImport.isPresent()) {
                 Import theImport = lookupImport.get();
                 logger.trace("theImport: {}", theImport);
-                ModelLocalUriId pmmlModelLocalUriID = EfestoPMMLUtils.getPmmlModelLocalUriId(theImport,pmmlModelName,
+                ModelLocalUriId pmmlModelLocalUriID = EfestoPMMLUtils.getPmmlModelLocalUriId(theImport, pmmlModelName,
                                                                                              ctx.getRelativeResolver());
                 logger.trace("pmmlResource: {}", pmmlModelLocalUriID);
                 DMNImportPMMLInfo pmmlInfo = model.getPmmlImportInfo().get(pmmlDocument);
@@ -620,6 +629,58 @@ public class DMNEvaluatorCompiler implements DMNDecisionLogicCompiler {
                                   null,
                                   null,
                                   Msg.FUNC_DEF_BODY_NOT_CONTEXT,
+                                  node.getIdentifierString());
+        }
+        return new DMNFunctionDefinitionEvaluator(node, funcDef);
+    }
+
+    private DMNExpressionEvaluator compileFunctionDefinitionLC4J(DMNCompilerContext ctx, DMNModelImpl model,
+                                                                 DMNBaseNode node, String functionName,
+                                                                 FunctionDefinition funcDef) {
+        if (funcDef.getExpression() instanceof Context) {
+            Context context = (Context) funcDef.getExpression();
+            String lc4jEngine = null;
+            String lc4jModelName = null;
+            for (ContextEntry ce : context.getContextEntry()) {
+                if (ce.getVariable() != null && ce.getVariable().getName() != null && ce.getExpression() instanceof LiteralExpression) {
+                    LiteralExpression ceLitExpr = (LiteralExpression) ce.getExpression();
+                    if (ce.getVariable().getName().equals("engine")) {
+                        if (ceLitExpr.getText() != null) {
+                            lc4jEngine = stripQuotes(ceLitExpr.getText().trim());
+                        }
+                    } else if (ce.getVariable().getName().equals("model")) {
+                        if (ceLitExpr.getText() != null) {
+                            lc4jModelName = stripQuotes(ceLitExpr.getText().trim());
+                        }
+                    }
+                }
+            }
+            LocalUri localUri = LocalUri.Root.append("lc4j").append(lc4jEngine).append(lc4jModelName);
+            ModelLocalUriId lc4jModelLocalUriID = new ModelLocalUriId(localUri);
+
+            LC4JInvocationEvaluator invoker = LC4JInvocationEvaluatorFactory.newInstance(model,
+                                                                                         funcDef,
+                                                                                         lc4jModelLocalUriID,
+                                                                                         lc4jEngine,
+                                                                                         lc4jModelName);
+            DMNFunctionDefinitionEvaluator func = new DMNFunctionDefinitionEvaluator(node, funcDef);
+            for (InformationItem p : funcDef.getFormalParameter()) {
+                DMNCompilerHelper.checkVariableName(model, p, p.getName());
+                DMNType dmnType = compiler.resolveTypeRef(model, p, p, p.getTypeRef());
+                func.addParameter(p.getName(), dmnType);
+                invoker.addParameter(p.getName(), dmnType);
+            }
+            func.setEvaluator(invoker);
+            return func;
+        } else {
+            MsgUtil.reportMessage(logger,
+                                  DMNMessage.Severity.ERROR,
+                                  funcDef,
+                                  model,
+                                  null,
+                                  null,
+                                  Msg.FUNC_DEF_PMML_MISSING_ENTRY,
+                                  functionName,
                                   node.getIdentifierString());
         }
         return new DMNFunctionDefinitionEvaluator(node, funcDef);
@@ -885,18 +946,21 @@ public class DMNEvaluatorCompiler implements DMNDecisionLogicCompiler {
      * @param ctx
      * @param expression
      * @param expressionLanguage
-     *
-     * @throws IllegalArgumentException if the given <code>expressionLanguage</code> is not <code>null</code> and is different from the URIFEEL and the BFEEL
      * @return
+     * @throws IllegalArgumentException if the given <code>expressionLanguage</code> is not <code>null</code> and is
+     * different from the URIFEEL and the BFEEL
      */
-    static FEEL getFEELDialectAdaptedFEEL(DMNCompilerContext ctx, LiteralExpression expression, String expressionLanguage) {
+    static FEEL getFEELDialectAdaptedFEEL(DMNCompilerContext ctx, LiteralExpression expression,
+                                          String expressionLanguage) {
         if (expressionLanguage == null ||
                 expressionLanguage.equals(expression.getURIFEEL())) {
             return ctx.getFeelHelper().newFEELInstance();
         } else if (expressionLanguage.equals(FEELDialect.BFEEL.getNamespace())) {
             return ctx.getFeelHelper().newFEELInstance(FEELDialect.BFEEL);
         } else {
-            String errorMessage = String.format("Unsupported FEEL language '%s'; allowed values are `null`, %s, %s", expressionLanguage, expression.getURIFEEL(), FEELDialect.BFEEL.getNamespace());
+            String errorMessage = String.format("Unsupported FEEL language '%s'; allowed values are `null`, %s, %s",
+                                                expressionLanguage, expression.getURIFEEL(),
+                                                FEELDialect.BFEEL.getNamespace());
             throw new IllegalArgumentException(errorMessage);
         }
     }
@@ -1049,36 +1113,43 @@ public class DMNEvaluatorCompiler implements DMNDecisionLogicCompiler {
     }
 
     protected DMNExpressionEvaluator compileConditional(DMNCompilerContext ctx, DMNModelImpl model, DMNBaseNode node,
-                                              String exprName, Conditional expression) {
-        DMNExpressionEvaluator ifEvaluator = compileExpression(ctx, model, node,  formatExpressionName(exprName, DMNConditionalEvaluator.EvaluatorType.IF),
+                                                        String exprName, Conditional expression) {
+        DMNExpressionEvaluator ifEvaluator = compileExpression(ctx, model, node, formatExpressionName(exprName,
+                                                                                                      DMNConditionalEvaluator.EvaluatorType.IF),
                                                                expression.getIf().getExpression());
-        DMNExpressionEvaluator thenEvaluator = compileExpression(ctx, model, node, formatExpressionName(exprName, DMNConditionalEvaluator.EvaluatorType.THEN),
+        DMNExpressionEvaluator thenEvaluator = compileExpression(ctx, model, node, formatExpressionName(exprName,
+                                                                                                        DMNConditionalEvaluator.EvaluatorType.THEN),
                                                                  expression.getThen().getExpression());
-        DMNExpressionEvaluator elseEvaluator = compileExpression(ctx, model, node, formatExpressionName(exprName, DMNConditionalEvaluator.EvaluatorType.ELSE),
+        DMNExpressionEvaluator elseEvaluator = compileExpression(ctx, model, node, formatExpressionName(exprName,
+                                                                                                        DMNConditionalEvaluator.EvaluatorType.ELSE),
                                                                  expression.getElse().getExpression());
 
         if (ifEvaluator == null) {
             MsgUtil.reportMessage(logger, DMNMessage.Severity.ERROR, node.getSource(), model, null, null,
-                                  Msg.MISSING_EXPRESSION_FOR_CONDITION, DMNConditionalEvaluator.EvaluatorType.IF.getValue(),
+                                  Msg.MISSING_EXPRESSION_FOR_CONDITION,
+                                  DMNConditionalEvaluator.EvaluatorType.IF.getValue(),
                                   node.getIdentifierString());
             return null;
         }
 
         if (thenEvaluator == null) {
             MsgUtil.reportMessage(logger, DMNMessage.Severity.ERROR, node.getSource(), model, null, null,
-                                  Msg.MISSING_EXPRESSION_FOR_CONDITION, DMNConditionalEvaluator.EvaluatorType.THEN.getValue(),
+                                  Msg.MISSING_EXPRESSION_FOR_CONDITION,
+                                  DMNConditionalEvaluator.EvaluatorType.THEN.getValue(),
                                   node.getIdentifierString());
             return null;
         }
 
         if (elseEvaluator == null) {
             MsgUtil.reportMessage(logger, DMNMessage.Severity.ERROR, node.getSource(), model, null, null,
-                                  Msg.MISSING_EXPRESSION_FOR_CONDITION, DMNConditionalEvaluator.EvaluatorType.ELSE.getValue(),
+                                  Msg.MISSING_EXPRESSION_FOR_CONDITION,
+                                  DMNConditionalEvaluator.EvaluatorType.ELSE.getValue(),
                                   node.getIdentifierString());
             return null;
         }
 
-        Map<DMNConditionalEvaluator.EvaluatorIdentifier, DMNExpressionEvaluator> evaluatorIdMap = getEvaluatorIdentifierMap(expression, ifEvaluator, thenEvaluator, elseEvaluator);
+        Map<DMNConditionalEvaluator.EvaluatorIdentifier, DMNExpressionEvaluator> evaluatorIdMap =
+                getEvaluatorIdentifierMap(expression, ifEvaluator, thenEvaluator, elseEvaluator);
 
         return new DMNConditionalEvaluator(exprName, node.getSource(), evaluatorIdMap);
     }
