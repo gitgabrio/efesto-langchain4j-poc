@@ -20,23 +20,21 @@ package org.kie.lc4j.efesto.runtime;
 
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
-import org.junit.jupiter.api.Test;
 
-import static org.kie.lc4j.efesto.runtime.Puppa.MODEL_NAME;
-import static org.kie.lc4j.efesto.runtime.Puppa.OLLAMA_BASE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PuppaTest {
+public class MainClass {
 
-    @Test
-    void mainTest() {
-        System.out.println( "mainTest" );
+    public static final String OLLAMA_BASE_URL = "http://localhost:11434/";
+    public static final String MODEL_NAME = "llama3.2";
+
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
         ChatModel chatModel = OllamaChatModel.builder()
                 .baseUrl(OLLAMA_BASE_URL)
                 .modelName(MODEL_NAME)
                 .logRequests(true)
                 .build();
-        System.out.println( "chatModel " + chatModel );
 
         String answer = chatModel.chat("Provide 3 short bullet points explaining why Java is awesome");
         System.out.println(answer);

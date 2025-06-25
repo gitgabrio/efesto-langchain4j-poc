@@ -56,6 +56,12 @@
       </dependency>
       <dependency>
         <groupId>org.kie</groupId>
+        <artifactId>kie-lc4j-efesto-runtime</artifactId>
+        <version>${project.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.kie</groupId>
         <artifactId>kie-dmn-feel</artifactId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
@@ -150,6 +156,10 @@
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-lc4j-efesto-compilation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-lc4j-efesto-runtime</artifactId>
     </dependency>
 
     <dependency>
@@ -284,6 +294,18 @@
       <artifactId>kie-pmml-models-tree-evaluator</artifactId>
       <scope>test</scope>
     </dependency>
+<!--    &lt;!&ndash; LC4J &ndash;&gt;-->
+<!--    <dependency>-->
+<!--      <groupId>org.kie</groupId>-->
+<!--      <artifactId>kie-lc4j-efesto-compilation</artifactId>-->
+<!--      <scope>test</scope>-->
+<!--    </dependency>-->
+<!--    <dependency>-->
+<!--      <groupId>org.kie</groupId>-->
+<!--      <artifactId>kie-lc4j-efesto-runtime</artifactId>-->
+<!--      <scope>test</scope>-->
+<!--    </dependency>-->
+
   </dependencies>
 
   <build>

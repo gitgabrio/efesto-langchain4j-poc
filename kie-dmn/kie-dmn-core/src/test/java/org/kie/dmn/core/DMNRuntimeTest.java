@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,29 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 public class DMNRuntimeTest extends BaseInterpretedVsCompiledTest {
 
     public static final Logger LOG = LoggerFactory.getLogger(DMNRuntimeTest.class);
+
+    @ParameterizedTest
+    @MethodSource("params")
+    @SuppressWarnings("unchecked")
+    void lc4jInvocation(boolean useExecModelCompiler) {
+        init(useExecModelCompiler);
+        final DMNRuntime runtime = DMNRuntimeUtil.createRuntime("valid_models/DMNv1_5/LC4JOllama.dmn", this.getClass());
+        final DMNModel dmnModel = runtime.getModel("https://kiegroup.org/dmn/_238bd96d-47cd-4746-831b-504f3e77b445",
+                                                   "LC4jOllama");
+        assertThat(dmnModel).isNotNull();
+        assertThat(dmnModel.hasErrors()).as(DMNRuntimeUtil.formatMessages(dmnModel.getMessages())).isFalse();
+
+        final DMNContext context = runtime.newContext();
+        context.set("chat", Collections.singleton("Hello World!"));
+
+        final DMNResult dmnResult = runtime.evaluateAll(dmnModel, context);
+        LOG.debug("{}", dmnResult);
+        assertThat(dmnResult.hasErrors()).as(DMNRuntimeUtil.formatMessages(dmnResult.getMessages())).isFalse();
+        assertThat(dmnResult.getDecisionResultByName("Decision")).isNotNull();
+        assertThat(dmnResult.getDecisionResultByName("Decision").getResult()).isNotNull().isInstanceOf(List.class);
+        List<String> result = (List<String>) dmnResult.getDecisionResultByName("Decision").getResult();
+        assertThat(result).hasSize(1);
+    }
 
     @ParameterizedTest
     @MethodSource("params")
