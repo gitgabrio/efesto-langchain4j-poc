@@ -71,7 +71,7 @@ class KieRuntimeServiceLC4JMapInputTest {
     @Test
     void evaluateInput() {
         modelLocalUriId = getModelLocalUriIdFromLC4JIdFactory(ENGINE_NAME, MODEL_NAME);
-        Map<String, List<String>> inputData = Map.of("chat", Collections.singletonList("Provide 3 short bullet points explaining why Java is awesome"));
+        Map<String, List<String>> inputData = Map.of("prompt", Collections.singletonList("Provide 3 short bullet points explaining why Java is awesome"));
         inputLC4J = new BaseEfestoInput<>(modelLocalUriId, inputData);
         EfestoLocalRuntimeContext efestoRuntimeContext = getEfestoContext(memoryCompilerClassLoader);
         Optional<EfestoOutputLC4J> retrieved = kieRuntimeService.evaluateInput(inputLC4J,

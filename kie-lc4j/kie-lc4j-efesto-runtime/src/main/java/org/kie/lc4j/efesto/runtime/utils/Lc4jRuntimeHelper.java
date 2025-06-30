@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.kie.efesto.common.api.identifiers.ModelLocalUriId;
 import org.kie.efesto.common.api.model.GeneratedExecutableResource;
-import org.kie.efesto.common.api.model.GeneratedModelResource;
-import org.kie.efesto.common.utils.PackageClassNameUtils;
 import org.kie.efesto.runtimemanager.api.exceptions.KieRuntimeServiceException;
 import org.kie.efesto.runtimemanager.api.model.EfestoInput;
 import org.kie.efesto.runtimemanager.api.model.EfestoLocalRuntimeContext;
@@ -70,17 +68,17 @@ public class Lc4jRuntimeHelper {
     }
 
     static EfestoOutputLC4J execute(ChatModel model, ModelLocalUriId modelLocalUriId, Map<String, List<String>> inputData) {
-        List<String> toChat = inputData.get("chat");
+        List<String> toPrompt = inputData.get("prompt");
 
         List<String> output =  new ArrayList<>();
-        for (String chat : toChat) {
-            output.add(executeChat(model, chat));
+        for (String line : toPrompt) {
+            output.add(executeChat(model, line));
         }
         return new EfestoOutputLC4J(modelLocalUriId, output);
     }
 
-    static String executeChat(ChatModel chatModel, String chat) {
-        return chatModel.chat(chat);
+    static String executeChat(ChatModel chatModel, String line) {
+        return chatModel.chat(line);
     }
 
 }

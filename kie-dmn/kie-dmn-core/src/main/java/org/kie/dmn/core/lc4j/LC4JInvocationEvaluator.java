@@ -108,7 +108,7 @@ public class LC4JInvocationEvaluator implements DMNExpressionEvaluator {
             LOG.error(errorMessage);
             throw new KieRuntimeServiceException(errorMessage);
         }
-        return Map.of("chat", retrieved.iterator().next().getOutputData());
+        return Map.of("prompt", retrieved.iterator().next().getOutputData());
     }
 
     /**
@@ -154,7 +154,7 @@ public class LC4JInvocationEvaluator implements DMNExpressionEvaluator {
             String pValue = getValueForLC4JInput(dmnr, p.name);
             chats.add(pValue);
         }
-        toReturn.put("chat", chats);
+        toReturn.put("prompt", chats);
         return toReturn;
     }
 

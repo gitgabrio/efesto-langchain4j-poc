@@ -35,9 +35,9 @@
   <dmn:itemDefinition name="tStringList" isCollection="true" label="tStringList">
     <dmn:typeRef>string</dmn:typeRef>
   </dmn:itemDefinition>
-  <dmn:inputData id="_38768C91-68B3-46E3-8F0A-0A34B293EF34" name="chat">
+  <dmn:inputData id="_38768C91-68B3-46E3-8F0A-0A34B293EF34" name="prompt">
     <dmn:extensionElements/>
-    <dmn:variable id="_9C968222-DB01-4CF8-82B9-56ECD745CFA8" name="chat" typeRef="tStringList"/>
+    <dmn:variable id="_9C968222-DB01-4CF8-82B9-56ECD745CFA8" name="prompt" typeRef="tStringList"/>
   </dmn:inputData>
   <dmn:decision id="_D27A288D-9F1B-4F1D-9DDA-3D51E23C234D" name="Decision">
     <dmn:extensionElements/>
@@ -53,9 +53,9 @@
         <dmn:text>TestLC4JBKM</dmn:text>
       </dmn:literalExpression>
       <dmn:binding>
-        <dmn:parameter id="_29A8E185-005E-415B-A04C-C812D4D234AE" name="chat" typeRef="tStringList"/>
+        <dmn:parameter id="_29A8E185-005E-415B-A04C-C812D4D234AE" name="prompt" typeRef="tStringList"/>
         <dmn:literalExpression id="_DBAF82E5-28B4-4AB8-AEE3-7E5B32F7BFE9">
-          <dmn:text>chat</dmn:text>
+          <dmn:text>prompt</dmn:text>
         </dmn:literalExpression>
       </dmn:binding>
     </dmn:invocation>
@@ -64,7 +64,7 @@
     <dmn:extensionElements/>
     <dmn:variable id="_F3BD1693-69BD-437E-B8DA-A55F5D30E96F" name="TestLC4JBKM" typeRef="Any"/>
     <dmn:encapsulatedLogic id="_BDC5E812-0CB0-4668-8657-E0C6370F9200" kind="LC4J">
-      <dmn:formalParameter id="_CCBDAD6E-5C39-44BD-8CF7-F47415B3D419" name="chat" typeRef="Any"/>
+      <dmn:formalParameter id="_CCBDAD6E-5C39-44BD-8CF7-F47415B3D419" name="prompt" typeRef="Any"/>
       <dmn:context id="_28BD1C76-E17C-4086-9CA8-CB223B0DFA0F">
         <dmn:contextEntry>
           <dmn:variable id="_5E2E3761-918C-4516-831C-6B091FE47048" name="engine" typeRef="string"/>

@@ -117,7 +117,7 @@ public class DMNRuntimeTest extends BaseInterpretedVsCompiledTest {
         assertThat(dmnModel.hasErrors()).as(DMNRuntimeUtil.formatMessages(dmnModel.getMessages())).isFalse();
 
         final DMNContext context = runtime.newContext();
-        context.set("chat", Collections.singleton("Hello World!"));
+        context.set("prompt", Collections.singleton("Hello World!"));
 
         final DMNResult dmnResult = runtime.evaluateAll(dmnModel, context);
         LOG.debug("{}", dmnResult);

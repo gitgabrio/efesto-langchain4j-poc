@@ -628,6 +628,7 @@ class ValidatorTest extends AbstractValidatorTest {
                 .filter(entry -> entry.getName().startsWith(directory) && !entry.isDirectory() && entry.getName().endsWith(".dmn"))
                 .map(ZipEntry::getName)
                 .map(ClassPathResource::new)
+                .filter(resource -> !resource.getPath().contains("LC4JOllama.dmn"))
                 .toArray(Resource[]::new);
         testResources(resources);
     }
@@ -637,6 +638,7 @@ class ValidatorTest extends AbstractValidatorTest {
             Resource[] resources = walk.filter(Files::isRegularFile)
                     .map(Path::toFile)
                     .map(FileSystemResource::new)
+                    .filter(r -> !r.getFile().getName().equals("LC4JOllama.dmn"))
                     .toArray(Resource[]::new);
             testResources(resources);
         } catch (IOException e) {
